@@ -1,4 +1,4 @@
-name: CI Pipeline (Java Maven)
+name: CI/CD Pipeline
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 
 jobs:
   build-and-test:
+    name: Build Java Maven
     runs-on: ubuntu-latest
 
     steps:
@@ -34,9 +35,29 @@ jobs:
     - name: Build with Maven (skip tests)
       run: mvn clean package -DskipTests
 
+    - name: Verify JAR exists
+      run: ls -la target
+
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-jar
         path: target/*.jar
         retention-days: 1
+
+  deploy:
+    name: Post Build / Deployment Stage
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download JAR artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: app-jar
+        path: target
+
+    - name: Simulate deployment
+      run: |
+        echo "Build SUCCESS ✅"
+        echo "Artifact ready in target/"
